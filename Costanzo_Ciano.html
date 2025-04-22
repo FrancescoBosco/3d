@@ -1,0 +1,125 @@
+<!DOCTYPE>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta content="charset=UTF-8"/>
+<title>3DHOP - 3D Heritage Online Presenter</title>
+<!--STYLESHEET-->
+<link type="text/css" rel="stylesheet" href="stylesheet/3dhop.css"/>
+<!--SPIDERGL-->
+<script type="text/javascript" src="js/spidergl.js"></script>
+<!--JQUERY-->
+<script type="text/javascript" src="js/jquery.js"></script>
+<!--PRESENTER-->
+<script type="text/javascript" src="js/presenter.js"></script>
+<!--3D MODELS LOADING AND RENDERING-->
+<script type="text/javascript" src="js/nexus.js"></script>
+<script type="text/javascript" src="js/ply.js"></script>
+<!--TRACKBALLS-->
+<script type="text/javascript" src="js/trackball_sphere.js"></script>
+<script type="text/javascript" src="js/trackball_turntable.js"></script>
+<script type="text/javascript" src="js/trackball_turntable_pan.js"></script>
+<script type="text/javascript" src="js/trackball_pantilt.js"></script>
+<!--UTILITY-->
+<script type="text/javascript" src="js/init.js"></script>
+</head>
+<body>
+<div id="3dhop" class="tdhop" onmousedown="if (event.preventDefault) event.preventDefault()"><div id="tdhlg"></div>
+ <div id="toolbar">
+  <img id="home"     title="Home"                  src="skins/dark/home.png"            /><br/>
+  <img id="zoomin"   title="Zoom In"               src="skins/dark/zoomin.png"          /><br/>
+  <img id="zoomout"  title="Zoom Out"              src="skins/dark/zoomout.png"         /><br/>
+  <img id="light_on" title="Disable Light Control" src="skins/dark/lightcontrol_on.png" style="position:absolute; visibility:hidden;"/>
+  <img id="light"    title="Enable Light Control"  src="skins/dark/lightcontrol.png"    /><br/>
+  <img id="background_off" title="Background Off"  src="skins/dark/color.png" 			/><br/>
+  <img id="background_on" title="Background On"  src="skins/dark/color_on.png" 			/><br/>
+  <img id="base_off"    title="Hide base"         src="skins/dark/sections.png"             /><br/>
+  <img id="full_on"  title="Exit Full Screen"      src="skins/dark/full_on.png"         style="position:absolute; visibility:hidden;"/>
+  <img id="full"     title="Full Screen"           src="skins/dark/full.png"            />
+ </div>
+ <canvas id="draw-canvas" style="background-image: url(skins/backgrounds/vecchia_piazza.jpeg)"/>
+</div>
+</body>
+
+<script type="text/javascript">
+var presenter = null;
+
+function setup3dhop() { 
+	presenter = new Presenter("draw-canvas");
+
+	presenter.setScene({
+		meshes: {
+			"ciano" : { url: "models/ciano.nxz" },
+			"basamento" : { url: "models/basamento.nxs" }
+		},
+		modelInstances : {
+			"corpoCiano" : {
+				mesh : "ciano"
+			},
+			"Base" : {
+				mesh : "basamento"
+			}
+		},
+
+		trackball: {
+			type: TurntablePanTrackball,
+			trackOptions: {
+				startPhi      : 0.0,
+				startTheta    : 0.0,
+				startDistance : 4.5,
+				startPanX     : 0.2,
+				startPanY     : 0.0,
+				startPanZ     : 0.0,
+				minMaxPhi     : [-180, 180],
+				minMaxTheta   : [-80.0, 80.0],
+				minMaxDist    : [0.4, 6.0],
+				minMaxPanX    : [-0.5, 0.5],
+				minMaxPanY    : [-0.6, 0.6],
+				minMaxPanZ    : [-0.3, 0.3],
+			}
+		}
+	});
+	presenter.setSpotVisibility(HOP_ALL, true, false);
+	presenter.enableSceneLighting()
+	presenter._onPickedSpot = onPickedSpot;
+	presenter._onPickedInstance = onPickedInstance;
+
+}
+
+function changeBackground(imageUrl) {
+    var canvas = document.getElementById('draw-canvas');
+	canvas.style.backgroundImage = 'url(' + imageUrl + ')';
+}
+
+function actionsToolbar(action) {
+	if(action=='home') presenter.resetTrackball(); 
+	else if(action=='zoomin') presenter.zoomIn();
+	else if(action=='zoomout') presenter.zoomOut(); 
+	else if(action=='light' || action=='light_on') { presenter.enableLightTrackball(!presenter.isLightTrackballEnabled()); lightSwitch(); }
+	else if(action=='full'  || action=='full_on') fullscreenSwitch();
+	else if(action == 'background_off') changeBackground('none');
+	else if(action == 'background_on') changeBackground('skins/backgrounds/vecchia_piazza.jpeg');
+	else if(action=='base_off') presenter.toggleInstanceVisibilityByName("Base", true); 
+}
+
+function onPickedSpot(id) {
+	switch(id) {
+     case 'corpoCiano' : alert("Ciano Model Clicked "); break;
+     case 'Base'  : alert("Pedestal Model Clicked"); break;
+  }
+}
+
+function onPickedInstance(id) {
+  switch(id) {
+     case 'corpoCiano' : alert("La statua a Costanzo Ciano fu commissionata a Francesco Messina nel 1939 dal podesta' di La Spezia e collocata in piazza Cortellazzo nel 1940. La statua rappresenta Costanzo Ciano in eta' matura, con le mani appoggiate sull'elsa della sciabola e il mantello che fende il vento. La statua presenta importanti elementi di modernismo, e' alta 3,50 metri e pesa circa 2 tonnellate. Per approfondimenti, vedi il pannello dedicato alla statua ...(link_pannello)"); break;
+     case 'Base'  : alert("Il basamento, che evocava la prua di una nave, riportava la scritta PARENZO POLA CORTELLAZZO BUCCARI, ricordando le imprese realizzate da Ciano nell'alto Adriatico durante la Prima Guerra Mondiale. Ciano vi si distinse infatti come uomo di valore, la cui impresa piu' importante fu la cosiddetta Beffa di Buccari. Per approfondimenti, vedi il pannello dedicato alla statua ...(link_pannello)"); break;
+  }
+}
+
+$(document).ready(function(){
+	init3dhop();
+
+	setup3dhop();
+});
+</script>
+
+</html>
